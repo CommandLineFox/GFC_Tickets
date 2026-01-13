@@ -1,0 +1,13 @@
+services:
+  gfc_tickets:
+    build:
+      context: .
+    env_file:
+      - .env.production
+    networks:
+      - shared-mongo-net
+    restart: unless-stopped
+
+networks:
+  shared-mongo-net:
+    external: true
