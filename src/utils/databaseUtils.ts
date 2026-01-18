@@ -140,13 +140,14 @@ export async function removeFromArray(guildId: string, databaseLocation: string,
     } else {
         if (typeof valueOrIndex === 'object') {
             index = array.findIndex((element: any) =>
-                Object.entries(valueOrIndex).every(
-                    ([key, val]) => element?.[key] === val
-                )
+                Object.entries(valueOrIndex).every(([key, val]) => element?.[key] === val)
             );
         } else {
-            index = array.indexOf(valueOrIndex);
+            index = array.findIndex((element: any) =>
+                element === valueOrIndex || element?.type === valueOrIndex
+            );
         }
+
         if (index === -1) {
             return { success: false, message: notExistsMessage };
         }
@@ -154,6 +155,7 @@ export async function removeFromArray(guildId: string, databaseLocation: string,
 
     array.splice(index, 1);
     guild.set(databaseLocation, array);
+
     try {
         await guild.save();
         return { success: true, message: successMessage };

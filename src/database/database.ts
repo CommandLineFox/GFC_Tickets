@@ -1,17 +1,58 @@
 import mongoose, {Document, Model, Schema} from 'mongoose';
 import {DatabaseConfig} from '../config/config';
+import {IndividualMessage} from "../types/activeTicket";
+import {Ticket} from "../types/guild";
 
 interface GuildDocument extends Document {
     id: string;
+    tickets?: Ticket[];
 }
+
+interface ActiveTicketDocument extends Document {
+    ownerUserId: string;
+    responderUserId: string;
+    type: string;
+    messageHistory: IndividualMessage
+}
+
+const ticketSchema = new Schema<Ticket>(
+    {
+        type: { type: String, required: true },
+
+        submissionChannelId: { type: String, required: false },
+        submissionTitle: { type: String, required: false },
+        submissionMessage: { type: String, required: false },
+        submissionButtonLabel: { type: String, required: false },
+
+        creationCategoryId: { type: String, required: false },
+        archiveChannelId: { type: String, required: false },
+
+        startingMessage: { type: String, required: false },
+
+        roleAccess: { type: Array, required: false },
+    },
+    { _id: false }
+);
+
 
 const guildSchema = new Schema<GuildDocument>(
     {
         id: { type: String, required: true, unique: true },
+        tickets: { type: [ticketSchema], required: false }
+    }
+);
+
+const activeTicketSchema = new Schema<ActiveTicketDocument>(
+    {
+        ownerUserId: { type: String, required: true },
+        responderUserId: { type: String, required: true },
+        type: { type: String, required: true },
+        messageHistory: { type: Array, required: true }
     }
 );
 
 const GuildModel: Model<GuildDocument> = mongoose.models.Guild || mongoose.model<GuildDocument>('Guild', guildSchema);
+export const TicketModel: Model<ActiveTicketDocument> = mongoose.models.Ticket || mongoose.model<ActiveTicketDocument>('Ticket', activeTicketSchema);
 
 export default class Database {
     private static instance: Database;
@@ -59,10 +100,7 @@ export default class Database {
         let guild = await GuildModel.findOne({ id });
         if (!guild) {
             guild = new GuildModel({
-                id,
-                youtubeNotifications: {
-                    channels: []
-                }
+                id
             });
             await guild.save();
         }
@@ -74,5 +112,21 @@ export default class Database {
      */
     public async getAllGuilds() {
         return GuildModel.find().lean();
+    }
+
+    /**
+     * Get a specific ticket
+     * @param channelId Ticket channel ID
+     * @param userId Ticket owner user ID
+     */
+    public async getActiveTicket(channelId: string, userId: string) {
+        return TicketModel.findOne({ channelId: channelId, ownerUserId: userId });
+    }
+
+    /**
+     * Return all tickets
+     */
+    public async getAllActiveTickets() {
+        return TicketModel.find().lean();
     }
 }
