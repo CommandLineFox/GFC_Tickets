@@ -10,9 +10,15 @@ interface GuildDocument extends Document {
 
 interface ActiveTicketDocument extends Document {
     ownerUserId: string;
-    responderUserId: string;
+    responderUserId?: string;
+    channelId: string;
+    startingMessageId?: string;
     type: string;
-    messageHistory: IndividualMessage
+    locked: boolean;
+    closed: boolean;
+    reason?: string;
+    createdTimestamp: number;
+    messageHistory: IndividualMessage[];
 }
 
 const ticketSchema = new Schema<Ticket>(
@@ -42,12 +48,26 @@ const guildSchema = new Schema<GuildDocument>(
     }
 );
 
+const individualMessageSchema = new Schema<IndividualMessage>(
+    {
+        timeStamp: { type: String, required: true },
+        message: { type: String, required: true },
+        userId: { type: String, required: true }
+    }
+);
+
 const activeTicketSchema = new Schema<ActiveTicketDocument>(
     {
         ownerUserId: { type: String, required: true },
-        responderUserId: { type: String, required: true },
+        responderUserId: { type: String, required: false },
+        channelId: { type: String, required: true },
+        startingMessageId: { type: String, required: false },
         type: { type: String, required: true },
-        messageHistory: { type: Array, required: true }
+        locked: { type: Boolean, required: true, default: false },
+        closed: { type: Boolean, required: true, default: false },
+        reason: { type: String, required: false },
+        createdTimestamp: { type: Number, required: true },
+        messageHistory: { type: [individualMessageSchema], default: [] }
     }
 );
 

@@ -3,7 +3,7 @@ import {Document} from 'mongoose';
 import Database from '../database/database';
 import {CustomResponse} from "../types/customResponse";
 import {Guild as DatabaseGuild, Ticket,} from '../types/guild';
-import {addToArray, removeFromArray, setValue, unsetValue} from "../utils/databaseUtils";
+import {addToArray, removeAllFromArray, removeFromArray, setValue, unsetValue} from "../utils/databaseUtils";
 
 export class GuildService {
     /**
@@ -589,6 +589,23 @@ export class GuildService {
             'No roles found.',
             'Role removed successfully.',
             'Error removing role.');
+    }
+
+    /**
+     * Remove all roles from the list of roles that can access a ticket type
+     * @param guildId Discord guild (server) ID
+     * @param ticketType Ticket type
+     */
+    public async clearRoleAccess(guildId: string, ticketType: string): Promise<CustomResponse> {
+        const id = await this.findTicketIndex(guildId, ticketType);
+        if (id === -1) {
+            return { success: false, message: 'Ticket type not found.' };
+        }
+
+        return await removeAllFromArray(guildId,
+            `tickets.${id}.roleAccess`,
+            'Role removed successfully.',
+            'Error removing roles.');
     }
 
     /**

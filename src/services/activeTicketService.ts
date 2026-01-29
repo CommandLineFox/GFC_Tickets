@@ -78,6 +78,57 @@ export class ActiveTicketService {
     }
 
     /**
+     * Removes the responder user for an active ticket
+     * @param channelId ID of the channel
+     * @param ownerUserId ID of the owner
+     */
+    public async removeResponderUser(channelId: string, ownerUserId: string): Promise<CustomResponse> {
+        const database = Database.getInstance();
+        if (!database) {
+            return { success: false, message: "There was an error fetching the database." };
+        }
+
+        const activeTicket = await database.getActiveTicket(channelId, ownerUserId);
+        if (!activeTicket) {
+            return { success: false, message: "There is no active ticket for this channel." };
+        }
+
+        try {
+            activeTicket.set("responderUserId", undefined);
+            await activeTicket.save();
+            return { success: true, message: "Successfully set responder user." };
+        } catch (error) {
+            return { success: false, message: "There was an error setting the responder user." };
+        }
+    }
+
+    /**
+     * Sets the starting message ID for an active ticket.
+     * @param channelId ID of the channel.
+     * @param ownerUserId ID of the owner.
+     * @param startingMessageId ID of the starting message.
+     */
+    public async setStartingMessageId(channelId: string, ownerUserId: string, startingMessageId: string): Promise<CustomResponse> {
+        const database = Database.getInstance();
+        if (!database) {
+            return { success: false, message: "There was an error fetching the database." };
+        }
+
+        const activeTicket = await database.getActiveTicket(channelId, ownerUserId);
+        if (!activeTicket) {
+            return { success: false, message: "There is no active ticket for this channel." };
+        }
+
+        try {
+            activeTicket.set("startingMessageId", startingMessageId);
+            await activeTicket.save();
+            return { success: true, message: "Successfully set starting message ID." };
+        } catch (error) {
+            return { success: false, message: "There was an error setting the starting message ID." };
+        }
+    }
+
+    /**
      * Sets the locked status of an active ticket.
      * @param channelId ID of the channel
      * @param ownerUserId ID of the owner

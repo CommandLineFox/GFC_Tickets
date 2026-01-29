@@ -33,6 +33,10 @@ export class TicketCommand extends Subcommand {
                 {
                     name: "post",
                     chatInputRun: "chatInputTicketPost"
+                },
+                {
+                    name: "view",
+                    chatInputRun: "chatInputTicketView"
                 }
             ],
             runIn: CommandOptionsRunTypeEnum.GuildText,
@@ -97,6 +101,17 @@ export class TicketCommand extends Subcommand {
                                 option
                                     .setName("ticket-type")
                                     .setDescription("The type of the ticket to post to")
+                                    .setRequired(true)
+                            )
+                    )
+                    .addSubcommand(command =>
+                        command
+                            .setName("view")
+                            .setDescription("View a ticket")
+                            .addStringOption(option =>
+                                option
+                                    .setName("ticket-type")
+                                    .setDescription("The type of the ticket to view")
                                     .setRequired(true)
                             )
                     )
@@ -222,6 +237,10 @@ export class TicketCommand extends Subcommand {
                     }
 
                     const client = container.client as BotClient;
+
+                    const clearResult = await client.getGuildService().clearRoleAccess(guildId, ticketType);
+                    if (!clearResult.success) return clearResult;
+
                     let allSuccess = true;
                     for (const roleId of roleIds) {
                         const result = await client.getGuildService().addRoleAccess(guildId, ticketType, roleId);
@@ -483,7 +502,8 @@ export class TicketCommand extends Subcommand {
 
         const embed = new EmbedBuilder()
             .setTitle("Tickets")
-            .setDescription(tickets.map(ticket => `**${ticket.type}** - <#${ticket.submissionChannelId}>`).join("\n"));
+            .setDescription(tickets.map(t => `**${t.type}** - ${t.submissionChannelId ? `<#${t.submissionChannelId}>` : "Not set"}`).join("\n"));
+
 
         await interaction.editReply({ embeds: [embed] })
     }
@@ -535,7 +555,7 @@ export class TicketCommand extends Subcommand {
             .setDescription(ticket.submissionMessage)
 
         const button = new ButtonBuilder()
-            .setCustomId(ticket.type)
+            .setCustomId(`submit-${ticket.type}`)
             .setLabel(ticket.submissionButtonLabel)
             .setStyle(ButtonStyle.Primary);
 
@@ -546,6 +566,44 @@ export class TicketCommand extends Subcommand {
             return;
         }
 
-        channel.send({ embeds: [embed], components: [row] });
+        await channel.send({ embeds: [embed], components: [row] });
+        await interaction.editReply("Ticket posted successfully.");
+    }
+
+    public async chatInputTicketView(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        const client = container.client as BotClient;
+        const guildService = client.getGuildService();
+
+        if (!interaction.guildId) {
+            await interaction.editReply("This command can only be used in a server.");
+            return;
+        }
+
+        const ticket = await guildService.getTicket(interaction.guildId, interaction.options.getString("ticket-type", true));
+        if (!ticket) {
+            await interaction.editReply("Ticket not found.");
+            return;
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle(ticket.type)
+            .addFields(
+                { name: "Submission channel", value: ticket.submissionChannelId ? `<#${ticket.submissionChannelId}>` : "Not set" },
+                { name: "Submission title", value: ticket.submissionTitle ?? "Not set" },
+                { name: "Submission message", value: ticket.submissionMessage ?? "Not set" },
+                { name: "Submission button label", value: ticket.submissionButtonLabel ?? "Not set" },
+                { name: "Creation category", value: ticket.creationCategoryId ? `<#${ticket.creationCategoryId}>` : "Not set" },
+                { name: "Archive channel", value: ticket.archiveChannelId ? `<#${ticket.archiveChannelId}>` : "Not set" },
+                { name: "Starting message", value: ticket.startingMessage ?? "Not set" },
+                { name: "Role access", value: ticket.roleAccess && ticket.roleAccess.length > 0 ? ticket.roleAccess.map(id => `<@&${id}>`).join(", ") : "No roles assigned" }
+            )
+
+        await interaction.editReply({ embeds: [embed] });
     }
 }

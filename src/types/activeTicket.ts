@@ -6,16 +6,19 @@ export interface IndividualMessage {
 
 export interface ActiveTicket {
     ownerUserId: string;
-    responderUserId: string;
+    responderUserId?: string;
 
     guildId: string;
     channelId: string;
+    startingMessageId?: string;
     type: string;
 
     locked: boolean;
     closed: boolean;
 
-    reason: string;
+    reason?: string;
 
-    messageHistory: IndividualMessage[];
+    createdTimestamp: number;
+
+    messageHistory?: IndividualMessage[];
 }
