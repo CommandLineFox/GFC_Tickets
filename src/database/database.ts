@@ -143,6 +143,15 @@ export default class Database {
         return TicketModel.findOne({ channelId: channelId, ownerUserId: userId });
     }
 
+
+    /**
+     * Get a specific ticket by channel ID
+     * @param channelId Ticket channel ID
+     */
+    public async getActiveTicketByChannelId(channelId: string) {
+        return TicketModel.findOne({ channelId: channelId });
+    }
+
     /**
      * Return all tickets
      */
