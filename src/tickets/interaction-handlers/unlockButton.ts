@@ -74,12 +74,6 @@ export class UnlockButtonHandler extends InteractionHandler {
         const client = container.client as BotClient;
         const ticketService = client.getTicketService();
 
-        const setResponderUser = await ticketService.setResponderUser(channelId, ownerUserId, interaction.user.id);
-        if (!setResponderUser.success) {
-            await interaction.editReply(setResponderUser.message);
-            return;
-        }
-
         const ticketChannel = await interaction.guild!.channels.fetch(channelId);
         if (!ticketChannel) {
             await interaction.editReply("There was an error fetching the ticket channel.");

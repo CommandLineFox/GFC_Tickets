@@ -126,7 +126,20 @@ export class CloseButtonHandler extends InteractionHandler {
             return;
         }
 
-        const fileContent = messageHistory.length === 0 ? "Empty" : messageHistory.map(m => `[${m.timeStamp}] ${m.userId}: ${m.message}`).join('\n');
+        const fileContent = messageHistory.length === 0
+            ? "Empty"
+            : messageHistory.map(m => {
+                const date = new Date(m.timeStamp).toLocaleString('sr-RS', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                return `[${date}] ${m.userId}: ${m.message}`;
+            }).join('\n');
+
         const attachment = new AttachmentBuilder(Buffer.from(fileContent), { name: `transcript-${channelId}.txt` });
 
         const ticket = await guildService.getTicket(interaction.guildId, activeTicket.type);
@@ -168,6 +181,10 @@ export class CloseButtonHandler extends InteractionHandler {
         }
 
         await archiveChannel.send({ embeds: [embed], files: [attachment] });
+
+        const dmChannel = await member.user.createDM();
+        await dmChannel.send({ embeds: [embed], files: [attachment] });
+
         await interaction.editReply("Ticket closed.");
 
         if (!ticketChannel.deletable) {

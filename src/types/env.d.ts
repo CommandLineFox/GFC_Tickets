@@ -23,10 +23,5 @@ declare namespace NodeJS {
         readonly DB_NAME: string;
         /** Mongo DB connection URL */
         readonly DB_URL: string;
-
-        /** YouTube API key */
-        readonly YOUTUBE_API_KEY: string;
-        /** Statbot API key */
-        readonly STATBOT_API_KEY: string;
     }
 }
