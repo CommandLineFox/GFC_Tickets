@@ -69,7 +69,25 @@ export class ChannelDeleteListener extends Listener {
             return;
         }
 
-        const fileContent = messageHistory.length === 0 ? "Empty" : messageHistory.map(m => `[${m.timeStamp}] ${m.userId}: ${m.message}`).join('\n');
+        const member = await channel.guild!.members.fetch(activeTicket.ownerUserId);
+        if (!member) {
+            return;
+        }
+
+        const fileContent = messageHistory.length === 0
+            ? "Empty"
+            : messageHistory.map(m => {
+                const date = new Date(m.timeStamp).toLocaleString('sr-RS', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                return `[${date}] ${member.user.username} (${m.userId}): ${m.message}`;
+            }).join('\n');
+
         const attachment = new AttachmentBuilder(Buffer.from(fileContent), { name: `transcript-${channel.id}.txt` });
 
         const ticket = await guildService.getTicket(channel.guildId, activeTicket.type);
