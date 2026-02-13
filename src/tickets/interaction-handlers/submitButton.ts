@@ -101,6 +101,10 @@ export class SubmitButtonHandler extends InteractionHandler {
                 deny: [PermissionFlagsBits.ViewChannel]
             },
             {
+                id: interaction.client.user.id,
+                allow: [PermissionFlagsBits.ViewChannel]
+            },
+            {
                 id: interaction.user.id,
                 allow: [PermissionFlagsBits.ViewChannel]
             },

@@ -138,7 +138,7 @@ export class CloseReasonButtonHandler extends InteractionHandler {
                     minute: '2-digit',
                     second: '2-digit'
                 });
-                return `[${date}] ${member.user.username} (${m.userId}): ${m.message}`;
+                return `[${date}] ${member.user.username}: ${m.message}`;
             }).join('\n');
 
         const attachment = new AttachmentBuilder(Buffer.from(fileContent), { name: `transcript-${channelId}.txt` });
@@ -171,7 +171,7 @@ export class CloseReasonButtonHandler extends InteractionHandler {
                 { name: "Claimed by", value: `<@${activeTicket.responderUserId}>`, inline: true },
                 { name: "Closed by", value: `<@${interaction.user.id}>`, inline: true },
                 { name: "Created at", value: `<t:${Math.floor(activeTicket.createdTimestamp / 1000)}:f>`, inline: true },
-                { name: "reason", value: finalReason, inline: true }
+                { name: "Reason", value: finalReason, inline: true }
             )
 
         const closeResult = await ticketService.setClosed(channelId, ownerUserId, true);
