@@ -25,7 +25,7 @@ export function getRemainingUptime(client: Client): number | null {
  * @param question The question to ask the user
  * @param timeoutMs The maximum amount of time to wait for a response (in milliseconds)
  */
-export async function askAndWait(interaction: RepliableInteraction, question: string, timeoutMs = 120_000): Promise<string | null> {
+export async function askAndWait(interaction: RepliableInteraction, question: string, timeoutMs = 300_000): Promise<string | null> {
     await interaction.editReply({ content: question });
 
     const channel = interaction.channel;

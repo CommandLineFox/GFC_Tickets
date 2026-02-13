@@ -1,5 +1,5 @@
 import {container, InteractionHandler, InteractionHandlerTypes} from "@sapphire/framework";
-import {ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, MessageFlags, PermissionFlagsBits, TextChannel} from "discord.js";
+import {ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder, MessageFlags, PermissionFlagsBits, TextChannel} from "discord.js";
 import Database from "../../database/database";
 import {BotClient} from "../../types/client";
 
@@ -101,8 +101,18 @@ export class UnclaimButtonHandler extends InteractionHandler {
             .setLabel("Claim")
             .setStyle(ButtonStyle.Success);
 
+
+        const embed = ticketStartingMessage.embeds[0];
+        if (!embed) {
+            await interaction.editReply("There was an error fetching the starting message embed.");
+            return;
+        }
+
+        const newEmbed = new EmbedBuilder(embed.data)
+            .setFooter(null);
+
         const row = new ActionRowBuilder<ButtonBuilder>({ components: [claimButton] });
-        await ticketStartingMessage.edit({ components: [row] });
+        await ticketStartingMessage.edit({ embeds: [embed], components: [row] });
 
         const removeResponderResult = await ticketService.removeResponderUser(channelId, ownerUserId);
         if (!removeResponderResult.success) {
