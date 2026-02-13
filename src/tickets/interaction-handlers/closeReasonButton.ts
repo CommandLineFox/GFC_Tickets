@@ -138,7 +138,7 @@ export class CloseReasonButtonHandler extends InteractionHandler {
                     minute: '2-digit',
                     second: '2-digit'
                 });
-                return `[${date}] ${member.user.username}: ${m.message}`;
+                return `[${date}] ${m.userId}: ${m.message}`;
             }).join('\n');
 
         const attachment = new AttachmentBuilder(Buffer.from(fileContent), { name: `transcript-${channelId}.txt` });
