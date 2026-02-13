@@ -108,7 +108,7 @@ export class CloseReasonButtonHandler extends InteractionHandler {
                 .map(m => ({
                     timeStamp: m.createdAt.toISOString(),
                     message: m.cleanContent || (m.attachments.size > 0 ? "[Attachment]" : "[Empty]"),
-                    userId: m.author.id
+                    userId: `${m.author.username} (${m.author.id})`
                 }));
 
             allMessages.push(...mapped);
