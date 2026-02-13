@@ -132,7 +132,7 @@ export class ClaimButtonHandler extends InteractionHandler {
         }
 
         const newEmbed = new EmbedBuilder(embed.data)
-            .setFooter({ text: `Ticket claimed by ${interaction.user.tag}` });
+            .setFooter({ text: `Ticket claimed by ${interaction.user.displayName}` });
 
         await ticketStartingMessage.edit({ embeds: [newEmbed], components: [row] });
         await interaction.editReply("Ticket claimed.");

@@ -112,7 +112,7 @@ export class UnclaimButtonHandler extends InteractionHandler {
             .setFooter(null);
 
         const row = new ActionRowBuilder<ButtonBuilder>({ components: [claimButton] });
-        await ticketStartingMessage.edit({ embeds: [embed], components: [row] });
+        await ticketStartingMessage.edit({ embeds: [newEmbed], components: [row] });
 
         const removeResponderResult = await ticketService.removeResponderUser(channelId, ownerUserId);
         if (!removeResponderResult.success) {
